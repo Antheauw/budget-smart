@@ -33,7 +33,7 @@ git clone https://github.com/ton-username/budgetsmart.git
 ```
 
 ### Option 2 — En ligne
-Le site est hébergé sur : **[ton-lien-ici]**
+Le site est hébergé sur : **https://antheauw.github.io/budget-smart/**
 
 ---
 
