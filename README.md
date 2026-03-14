@@ -28,7 +28,7 @@ Aucune installation requise. C'est un fichier HTML unique et autonome.
 
 ### Option 1 — En local
 ```bash
-git clone https://github.com/ton-username/budgetsmart.git
+git clone https://github.com/antheauw/budget-smart.git
 # Ouvre simplement depenses-mensuelles.html dans ton navigateur
 ```
 
