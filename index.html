@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BudgetSmart — Alternatives directes</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f5f0;
+  --card: #ffffff;
+  --card2: #f0ede6;
+  --border: #e2ddd5;
+  --text: #1a1714;
+  --muted: #8a8278;
+  --muted2: #b8b2a8;
+  --green: #1a6b3a;
+  --green-bg: #e8f5ee;
+  --green-mid: #52c07a;
+  --red: #c0392b;
+  --orange: #c06a1a;
+  --blue: #1a4a8a;
+  --accent: #2d5be3;
+}
+html.dark {
+  --bg: #0f1117;
+  --card: #1a1d27;
+  --card2: #13161f;
+  --border: #2a2d3a;
+  --text: #eef0f6;
+  --muted: #6b7091;
+  --muted2: #4a4f68;
+  --green: #34d070;
+  --green-bg: #0d2318;
+  --green-mid: #34d070;
+  --red: #f87171;
+  --orange: #fb923c;
+  --blue: #60a5fa;
+  --accent: #6085f5;
+}
+html { transition: background 0.3s, color 0.3s; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Instrument Sans',sans-serif; min-height:100vh; }
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:0.4;
+}
+.page { max-width:1140px; margin:0 auto; padding:0 20px 100px; }
+
+/* HEADER */
+header {
+  padding:28px 0 20px;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  border-bottom:2px solid var(--text); margin-bottom:32px;
+}
+.logo { display:flex; align-items:center; gap:10px; }
+.logo-mark { width:38px; height:38px; background:var(--text); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.logo h1 { font-family:'Cabinet Grotesk',sans-serif; font-size:20px; font-weight:900; letter-spacing:-0.5px; }
+.header-pills { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.pill-total { background:var(--text); color:var(--bg); padding:8px 18px; border-radius:100px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; }
+.pill-save { background:var(--green-bg); color:var(--green); border:1.5px solid #a8dabb; padding:8px 18px; border-radius:100px; font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; display:none; }
+
+/* LOCATION */
+.loc-bar { background:var(--card); border:1.5px solid var(--border); border-radius:16px; padding:16px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:28px; }
+.loc-bar label { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); font-weight:600; display:block; margin-bottom:5px; }
+.loc-bar select { background:var(--bg); border:1.5px solid var(--border); color:var(--text); padding:9px 12px; border-radius:10px; font-family:'Instrument Sans',sans-serif; font-size:14px; font-weight:500; outline:none; cursor:pointer; min-width:148px; transition:border-color 0.15s; }
+.loc-bar select:focus { border-color:var(--text); }
+.loc-field { flex:1; min-width:140px; }
+
+/* LAYOUT */
+.layout { display:grid; grid-template-columns:1fr 360px; gap:24px; align-items:start; }
+@media(max-width:860px){ .layout { grid-template-columns:1fr; } }
+
+/* CATEGORY BLOCK */
+.cat-block { background:var(--card); border:1.5px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:14px; transition:box-shadow 0.2s; }
+.cat-block:hover { box-shadow:0 4px 20px rgba(0,0,0,0.07); }
+.cat-head { display:flex; align-items:center; gap:14px; padding:16px 20px; cursor:pointer; user-select:none; }
+.cat-emoji { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.cat-label { flex:1; }
+.cat-name { font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:15px; }
+.cat-count { font-size:12px; color:var(--muted); margin-top:1px; }
+.cat-sum { font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:17px; }
+.cat-arrow { color:var(--muted2); font-size:11px; transition:transform 0.3s; }
+.cat-block.open .cat-arrow { transform:rotate(180deg); }
+.cat-body { display:none; border-top:1.5px solid var(--border); }
+.cat-block.open .cat-body { display:block; }
+
+/* EXPENSE ROW */
+.exp-row { display:flex; align-items:stretch; border-bottom:1px solid var(--border); }
+.exp-row:last-of-type { border-bottom:none; }
+.exp-status { width:6px; flex-shrink:0; align-self:stretch; background:var(--border); transition:background 0.3s; }
+.exp-status.ok { background:var(--green-mid); }
+.exp-status.warn { background:#f59e0b; }
+.exp-status.bad { background:var(--red); }
+.exp-left { flex:1; display:flex; align-items:center; gap:12px; padding:14px 20px; }
+.exp-icon { font-size:18px; width:24px; text-align:center; }
+.exp-name-wrap { flex:1; }
+.exp-lbl { font-size:12px; color:var(--muted); margin-bottom:2px; font-weight:500; }
+.exp-name-in { background:transparent; border:none; outline:none; font-family:'Cabinet Grotesk',sans-serif; font-size:15px; font-weight:700; color:var(--text); width:100%; }
+.exp-right { display:flex; align-items:center; border-left:1px solid var(--border); }
+.exp-amt { display:flex; align-items:center; gap:4px; padding:0 14px; width:130px; }
+.exp-cur { font-size:14px; color:var(--muted); font-weight:600; }
+.exp-amt-in { background:transparent; border:none; outline:none; font-family:'Cabinet Grotesk',sans-serif; font-size:17px; font-weight:900; color:var(--text); width:80px; text-align:right; }
+.exp-amt-in::placeholder { color:var(--muted2); font-weight:400; }
+.exp-del { width:44px; display:flex; align-items:center; justify-content:center; border-left:1px solid var(--border); background:none; border-top:none; border-right:none; border-bottom:none; color:var(--muted2); cursor:pointer; font-size:15px; transition:color 0.15s; }
+.exp-del:hover { color:var(--red); }
+
+/* ALTERNATIVES PANEL */
+.exp-alts { display:none; background:#fafaf8; border-top:1px solid var(--border); }
+html.dark .exp-alts { background: #13161f; }
+.exp-alts.show { display:block; }
+.alts-hd { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 20px 6px; }
+.alts-hd-left { display:flex; align-items:center; gap:8px; font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.8px; }
+.alts-disclaimer {
+  font-size:10px; color:var(--muted2);
+  background: var(--orange-bg, #fff8ee); border:1px solid rgba(192,106,26,0.2);
+  border-radius:6px; padding:3px 8px;
+  display:flex; align-items:center; gap:4px;
+  white-space:nowrap;
+}
+html.dark .alts-disclaimer { background: rgba(192,106,26,0.1); }
+.alts-scroll-wrap {
+  overflow: hidden;
+  /* show exactly ~3 chips + peek of a 4th */
+  max-width: calc(3 * 185px + 3 * 10px + 20px + 30px);
+}
+.alts-scroll { display:flex; gap:10px; padding:0 20px 14px; overflow-x:auto; overflow-y:visible; scrollbar-width:none; cursor:grab; user-select:none; }
+.alts-scroll::-webkit-scrollbar { display:none; }
+.alts-scroll.dragging { cursor:grabbing; }
+
+.alt-chip { flex-shrink:0; background:var(--card); border:1.5px solid var(--border); border-radius:12px; padding:13px 15px; width:185px; cursor:pointer; position:relative; transition:border-color 0.2s, transform 0.15s; }
+.alt-chip:hover { border-color:var(--green); transform:translateY(-2px); }
+.alt-chip.best { border-color:var(--green); }
+.best-badge { position:absolute; top:-8px; left:12px; background:var(--green); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:100px; text-transform:uppercase; letter-spacing:0.5px; }
+.chip-name { font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:14px; margin-bottom:3px; }
+.chip-offer { font-size:12px; color:var(--muted); margin-bottom:8px; line-height:1.4; }
+.chip-price { font-family:'Cabinet Grotesk',sans-serif; font-weight:900; font-size:18px; color:var(--green); }
+.chip-save { font-size:11px; color:var(--green); font-weight:600; margin-top:1px; }
+.chip-neutral { font-size:11px; color:var(--muted); margin-top:1px; }
+.chip-tip { font-size:11px; color:var(--orange); margin-top:4px; }
+
+/* ADD BUTTON */
+.btn-add-r { display:flex; align-items:center; gap:8px; padding:12px 20px; width:100%; background:none; border:none; color:var(--muted); cursor:pointer; font-family:'Instrument Sans',sans-serif; font-size:13px; font-weight:500; transition:color 0.15s; border-top:1px dashed var(--border); }
+.btn-add-r:hover { color:var(--accent); }
+
+/* SIDEBAR */
+.sidebar { display:flex; flex-direction:column; gap:16px; }
+.s-card { background:var(--card); border:1.5px solid var(--border); border-radius:16px; padding:22px; }
+.s-title { font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:12px; text-transform:uppercase; letter-spacing:1px; margin-bottom:16px; color:var(--muted); }
+.sum-row { margin-bottom:12px; }
+.sum-rh { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+.sum-rn { font-size:13px; font-weight:500; }
+.sum-rv { font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:14px; }
+.sum-bar { height:6px; background:var(--border); border-radius:100px; overflow:hidden; }
+.sum-bf { height:100%; border-radius:100px; transition:width 0.4s ease; }
+
+/* GLOBAL ALTS */
+.ga-wrap { background:var(--card); border:1.5px solid var(--border); border-radius:16px; overflow:hidden; }
+.ga-head { padding:18px 22px 14px; border-bottom:1.5px solid var(--border); }
+.ga-title { font-family:'Cabinet Grotesk',sans-serif; font-weight:900; font-size:16px; }
+.ga-sub { font-size:12px; color:var(--muted); margin-top:3px; }
+.ga-item { display:flex; align-items:center; gap:14px; padding:14px 22px; border-bottom:1px solid var(--border); }
+.ga-item:last-child { border-bottom:none; }
+.ga-ico { font-size:20px; width:28px; text-align:center; }
+.ga-inf { flex:1; }
+.ga-nm { font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:14px; }
+.ga-ds { font-size:12px; color:var(--muted); margin-top:2px; }
+.ga-sv { text-align:right; }
+.ga-sv-n { font-family:'Cabinet Grotesk',sans-serif; font-weight:900; font-size:15px; color:var(--green); }
+.ga-sv-l { font-size:11px; color:var(--muted); }
+.no-alt { padding:24px; text-align:center; color:var(--muted); font-size:13px; }
+.ga-annual { padding:14px 22px; background:var(--green-bg); border-top:1.5px solid #a8dabb; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.ga-an-t { font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:13px; color:var(--green); }
+.ga-an-s { font-size:12px; color:#4a9a6a; margin-top:2px; }
+.ga-an-v { font-family:'Cabinet Grotesk',sans-serif; font-weight:900; font-size:24px; color:var(--green); }
+
+html.dark .cat-block:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+html.dark .exp-alts { background: #13161f; }
+html.dark .alt-chip { background: var(--card); }
+html.dark .ga-annual { background: var(--green-bg); border-color: rgba(52,208,112,0.2); }
+html.dark .ga-an-t, html.dark .ga-an-v { color: var(--green); }
+html.dark .ga-an-s { color: var(--green); opacity: 0.7; }
+html.dark .people-bar select, html.dark .loc-bar select { background: var(--bg); color: var(--text); }
+.alt-chip { animation:slideUp 0.2s ease forwards; }
+
+/* SAVINGS PLAN PANEL */
+.savings-plan {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: var(--card);
+  border-top: 2px solid var(--text);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.savings-plan.open { transform: translateY(0); }
+html.dark .savings-plan { box-shadow: 0 -8px 40px rgba(0,0,0,0.5); }
+
+.sp-toggle {
+  position: fixed; bottom: 20px; right: 24px; z-index: 300;
+  background: var(--text); color: var(--bg);
+  border: none; border-radius: 100px; cursor: pointer;
+  padding: 12px 20px;
+  font-family: 'Cabinet Grotesk', sans-serif; font-weight: 800; font-size: 13px;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transition: transform 0.2s, opacity 0.2s;
+}
+.sp-toggle:hover { transform: translateY(-2px); }
+.sp-badge {
+  background: var(--green); color: #fff;
+  border-radius: 100px; padding: 1px 8px;
+  font-size: 12px; font-weight: 900; min-width: 20px; text-align: center;
+}
+.sp-inner { max-width: 1140px; margin: 0 auto; padding: 20px 24px; }
+.sp-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 12px;
+}
+.sp-title { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 900; font-size: 18px; }
+.sp-close {
+  background: none; border: 1.5px solid var(--border);
+  color: var(--muted); cursor: pointer; border-radius: 8px;
+  padding: 6px 12px; font-size: 13px; font-weight: 600;
+  transition: all 0.15s;
+}
+.sp-close:hover { border-color: var(--text); color: var(--text); }
+
+.sp-stats {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.sp-stat {
+  background: var(--green-bg); border: 1.5px solid rgba(52,208,112,0.25);
+  border-radius: 12px; padding: 12px 18px; flex: 1; min-width: 130px;
+}
+.sp-stat-v { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 900; font-size: 22px; color: var(--green); }
+.sp-stat-l { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 500; }
+
+.sp-items { display: flex; gap: 10px; flex-wrap: wrap; }
+.sp-item {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  animation: slideUp 0.2s ease forwards;
+  transition: border-color 0.15s;
+}
+.sp-item:hover { border-color: var(--red); }
+.sp-item-info { flex: 1; }
+.sp-item-name { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 13px; }
+.sp-item-offer { font-size: 11px; color: var(--muted); }
+.sp-item-price { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 900; font-size: 14px; color: var(--green); margin-right: 4px; }
+.sp-item-save { font-size: 10px; color: var(--green); font-weight: 600; }
+.sp-item-rm {
+  background: none; border: none; cursor: pointer;
+  color: var(--muted2); font-size: 14px; padding: 2px 4px;
+  transition: color 0.15s; line-height: 1;
+}
+.sp-item-rm:hover { color: var(--red); }
+.sp-empty { color: var(--muted); font-size: 13px; padding: 8px 0; }
+
+/* CHIP ADD BUTTON */
+.chip-add {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 8px; padding: 6px 12px;
+  background: var(--green-bg); color: var(--green);
+  border: 1.5px solid rgba(52,208,112,0.35);
+  border-radius: 8px;
+  font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 12px;
+  cursor: pointer; width: 100%; justify-content: center;
+  transition: all 0.15s;
+}
+.chip-add:hover { background: var(--green); color: #fff; border-color: var(--green); }
+.chip-add.added { background: var(--green); color: #fff; border-color: var(--green); opacity: 0.7; cursor: default; }
+html.dark .chip-add { background: rgba(52,208,112,0.1); }
+.theme-toggle {
+  width: 44px; height: 24px;
+  background: var(--border);
+  border-radius: 100px;
+  border: none; cursor: pointer;
+  position: relative;
+  transition: background 0.25s;
+  flex-shrink: 0;
+}
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  background: var(--text);
+  border-radius: 50%;
+  transition: transform 0.25s, background 0.25s;
+}
+html.dark .theme-toggle { background: #3a3f5c; }
+html.dark .theme-toggle::after { transform: translateX(20px); background: #eef0f6; }
+.theme-icon { font-size: 15px; line-height: 1; }
+.people-bar {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 16px 20px;
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.people-label { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); font-weight:600; white-space:nowrap; }
+.people-counter { display:flex; align-items:center; gap:10px; }
+.people-btn {
+  width:32px; height:32px; border-radius:50%;
+  border: 1.5px solid var(--border); background: var(--bg);
+  font-size:18px; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; color:var(--text); transition: all 0.15s;
+  user-select:none;
+}
+.people-btn:hover { border-color:var(--text); background:var(--text); color:var(--bg); }
+.people-num { font-family:'Cabinet Grotesk',sans-serif; font-weight:900; font-size:22px; min-width:32px; text-align:center; }
+.people-avatars { display:flex; gap:4px; align-items:center; flex-wrap:wrap; }
+.avatar { font-size:20px; transition: all 0.2s; }
+.avatar.faded { opacity:0.2; }
+.people-info { flex:1; min-width:200px; }
+.people-info-main { font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:15px; }
+.people-info-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+.per-person-pill {
+  background: #eff6ff; color: var(--blue);
+  border: 1.5px solid #bfdbfe;
+  padding: 6px 14px; border-radius: 100px;
+  font-family:'Cabinet Grotesk',sans-serif; font-weight:700; font-size:13px;
+  white-space:nowrap; display:none;
+}
+.family-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  background: #fef3c7; color: #92400e;
+  border-radius:100px; padding:2px 8px;
+  font-size:10px; font-weight:700; margin-left:6px;
+  text-transform:uppercase; letter-spacing:0.5px;
+}
+.chip-perperson { font-size:11px; color:var(--blue); font-weight:600; margin-top:2px; }
+.chip-visit {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 10px; padding: 6px 12px;
+  background: var(--text); color: var(--bg);
+  border: none; border-radius: 8px;
+  font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 12px;
+  cursor: pointer; text-decoration: none;
+  transition: opacity 0.15s, transform 0.1s;
+  width: 100%;
+  justify-content: center;
+}
+.chip-visit:hover { opacity: 0.85; transform: translateY(-1px); }
+html.dark .chip-visit { background: var(--text); color: var(--bg); }
+.ga-visit {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 10px; border-radius: 8px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 11px;
+  color: var(--text); text-decoration: none; white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+  margin-top: 4px; flex-shrink: 0;
+}
+.ga-visit:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">💡</div>
+    <h1>BudgetSmart</h1>
+  </div>
+  <div class="header-pills">
+    <div class="pill-save" id="pill-save">🎯 Économiser : <span id="pill-save-val">0 €</span>/mois</div>
+    <div class="pill-total">Total : <span id="grand-total">0 €</span>/mois</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-left:4px">
+      <span class="theme-icon" id="theme-icon">☀️</span>
+      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Mode sombre / clair"></button>
+      <span class="theme-icon">🌙</span>
+    </div>
+  </div>
+</header>
+
+<div class="loc-bar">
+  <span style="font-size:22px">📍</span>
+  <div class="loc-field">
+    <label>Pays</label>
+    <select id="sel-country" onchange="onLocChange()">
+      <option value="FR">🇫🇷 France</option>
+      <option value="BE">🇧🇪 Belgique</option>
+      <option value="CH">🇨🇭 Suisse</option>
+      <option value="ES">🇪🇸 Espagne</option>
+      <option value="IT">🇮🇹 Italie</option>
+      <option value="DE">🇩🇪 Allemagne</option>
+      <option value="UK">🇬🇧 Royaume-Uni</option>
+      <option value="PT">🇵🇹 Portugal</option>
+      <option value="CA">🇨🇦 Canada</option>
+      <option value="US">🇺🇸 États-Unis</option>
+      <option value="MA">🇲🇦 Maroc</option>
+    </select>
+  </div>
+  <div class="loc-field">
+    <label>Zone</label>
+    <select id="sel-zone" onchange="onLocChange()">
+      <option value="urban">🏙️ Urbain</option>
+      <option value="suburban">🏘️ Péri-urbain</option>
+      <option value="rural">🌿 Rural</option>
+    </select>
+  </div>
+  <div class="loc-field">
+    <label>Profil</label>
+    <select id="sel-profile" onchange="onLocChange()">
+      <option value="single">👤 Seul(e)</option>
+      <option value="couple">👫 Couple</option>
+      <option value="family">👨‍👩‍👧 Famille</option>
+      <option value="student">🎓 Étudiant(e)</option>
+    </select>
+  </div>
+</div>
+
+<!-- PEOPLE COUNTER -->
+<div class="people-bar">
+  <span style="font-size:22px">👥</span>
+  <div>
+    <div class="people-label">Nombre de personnes</div>
+    <div class="people-counter" style="margin-top:6px">
+      <button class="people-btn" onclick="changePeople(-1)">−</button>
+      <div class="people-num" id="people-num">1</div>
+      <button class="people-btn" onclick="changePeople(1)">+</button>
+    </div>
+  </div>
+  <div class="people-avatars" id="people-avatars">
+    <span class="avatar">🧑</span>
+    <span class="avatar faded">🧑</span>
+    <span class="avatar faded">🧑</span>
+    <span class="avatar faded">🧑</span>
+    <span class="avatar faded">🧑</span>
+    <span class="avatar faded">🧑</span>
+  </div>
+  <div class="people-info">
+    <div class="people-info-main" id="people-label-main">Seul(e)</div>
+    <div class="people-info-sub" id="people-label-sub">Les dépenses sont affichées en total</div>
+  </div>
+  <div class="per-person-pill" id="per-person-pill">
+    <span id="per-person-val">0 €</span> / pers.
+  </div>
+</div>
+
+<div class="layout">
+  <div id="cats-wrap"></div>
+  <div class="sidebar">
+    <div class="s-card">
+      <div class="s-title">Répartition mensuelle</div>
+      <div id="bars"></div>
+      <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;color:var(--muted);font-weight:500">Total</span>
+        <span id="sb-total" style="font-family:'Cabinet Grotesk',sans-serif;font-weight:900;font-size:22px">0 €</span>
+      </div>
+    </div>
+    <div class="ga-wrap">
+      <div class="ga-head">
+        <div class="ga-title">Meilleures économies 🎯</div>
+        <div class="ga-sub" id="ga-sub">Saisissez vos dépenses pour voir les alternatives</div>
+        <div style="margin-top:6px;font-size:10px;color:var(--muted2);display:flex;align-items:center;gap:4px">
+          ⚠️ Prix indicatifs — toujours vérifier sur le site de l'opérateur
+        </div>
+      </div>
+      <div id="ga-list"><div class="no-alt">Aucune dépense saisie encore</div></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- SAVINGS PLAN FLOATING BUTTON -->
+<button class="sp-toggle" id="sp-toggle" onclick="toggleSavingsPlan()">
+  💰 Mon plan d'économies
+  <span class="sp-badge" id="sp-badge">0</span>
+</button>
+
+<!-- SAVINGS PLAN PANEL -->
+<div class="savings-plan" id="savings-plan">
+  <div class="sp-inner">
+    <div class="sp-header">
+      <div class="sp-title">💰 Mon plan d'économies</div>
+      <button class="sp-close" onclick="toggleSavingsPlan()">Fermer ✕</button>
+    </div>
+    <div class="sp-stats">
+      <div class="sp-stat">
+        <div class="sp-stat-v" id="sp-total-month">0 €</div>
+        <div class="sp-stat-l">économisés / mois</div>
+      </div>
+      <div class="sp-stat" id="sp-stat-person" style="display:none">
+        <div class="sp-stat-v" id="sp-total-person">0 €</div>
+        <div class="sp-stat-l">économisés / pers. / mois</div>
+      </div>
+      <div class="sp-stat">
+        <div class="sp-stat-v" id="sp-total-year">0 €</div>
+        <div class="sp-stat-l">économisés / an (foyer)</div>
+      </div>
+    </div>
+    <div class="sp-items" id="sp-items">
+      <div class="sp-empty">Cliquez sur "+ Ajouter au plan" sur n'importe quelle offre ci-dessus</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// MARKET DATABASE — real offers per country
+// =============================================
+// Each offer: n=name, o=offer description, p=price, tip=tip text
+// family offers: fam=true, minPeople=min persons needed, pPerPerson=price per person
+const MKT = {
+  mobile: {
+    FR:[
+      {n:"Prixtel Oxygène",o:"120 Go 5G (modulable)",p:6.99,url:"https://www.prixtel.com"},
+      {n:"Lebara",o:"250 Go 5G",p:8.99,url:"https://mobile.lebara.com/fr"},
+      {n:"Lebara",o:"50 Go 4G",p:5.99,url:"https://mobile.lebara.com/fr"},
+      {n:"Syma Mobile",o:"130 Go 5G",p:7.99,url:"https://www.syma.fr"},
+      {n:"NRJ Mobile",o:"120 Go 5G",p:7.99,url:"https://www.nrjmobile.fr"},
+      {n:"YouPrice",o:"150 Go 5G (réseau SFR)",p:7.99,url:"https://www.youprice.fr"},
+      {n:"Auchan Telecom",o:"180 Go 5G",p:8.99,url:"https://www.auchan-telecom.fr"},
+      {n:"Cdiscount Mobile",o:"150 Go 5G",p:8.99,url:"https://mobile.cdiscount.com"},
+      {n:"RED by SFR",o:"10 Go 4G",p:6.99,url:"https://www.red-by-sfr.fr/forfaits-mobiles/"},
+      {n:"RED by SFR",o:"100 Go 5G",p:7.99,url:"https://www.red-by-sfr.fr/forfaits-mobiles/"},
+      {n:"RED by SFR",o:"110 Go 5G",p:8.99,url:"https://www.red-by-sfr.fr/forfaits-mobiles/"},
+      {n:"RED by SFR",o:"250 Go 5G",p:12.99,url:"https://www.red-by-sfr.fr/forfaits-mobiles/"},
+      {n:"RED by SFR",o:"350 Go 5G",p:19.99,url:"https://www.red-by-sfr.fr/forfaits-mobiles/"},
+      {n:"Prixtel Le Grand",o:"200 Go 5G (modulable)",p:9.99,url:"https://www.prixtel.com"},
+      {n:"B&You",o:"100 Go 5G",p:10.99,url:"https://www.bouyguestelecom.fr/offres-mobiles/bandyou"},
+      {n:"B&You",o:"200 Go 5G",p:13.99,url:"https://www.bouyguestelecom.fr/offres-mobiles/bandyou"},
+      {n:"Free Mobile",o:"350 Go 5G+",p:19.99,url:"https://mobile.free.fr"},
+      // Offres famille
+      {n:"Free Mobile",o:"Pack Famille 4 lignes 5G",p:59.99,fam:true,minPeople:4,pPerPerson:15,famTag:"4 lignes",url:"https://mobile.free.fr"},
+      {n:"SFR",o:"Forfait Famille 4 lignes",p:60,fam:true,minPeople:3,pPerPerson:15,famTag:"3-4 pers.",url:"https://www.sfr.fr"},
+      {n:"Bouygues",o:"Pack Famille 4 lignes",p:60,fam:true,minPeople:4,pPerPerson:15,famTag:"4 lignes",url:"https://www.bouyguestelecom.fr"},
+    ],
+    BE:[
+      {n:"Scarlet",o:"Surf 2Go",p:12,url:"https://www.scarlet.be"},
+      {n:"Mobile Vikings",o:"50Go",p:14,url:"https://www.mobilevikings.be"},
+      {n:"Orange Go",o:"25Go",p:15,url:"https://www.orange.be"},
+      {n:"Orange Famille",o:"3 lignes",p:45,fam:true,minPeople:3,pPerPerson:15,famTag:"3 pers.",url:"https://www.orange.be"},
+    ],
+    CH:[
+      {n:"Yallo",o:"M 10Go",p:19,url:"https://www.yallo.ch"},
+      {n:"Lidl Connect",o:"L 5Go",p:14.90,url:"https://www.lidlconnect.ch"},
+      {n:"Salt New S",o:"5Go",p:19.95,url:"https://www.salt.ch"},
+      {n:"Sunrise",o:"Family 3 lignes",p:60,fam:true,minPeople:3,pPerPerson:20,famTag:"3 pers.",url:"https://www.sunrise.ch"},
+    ],
+    DE:[
+      {n:"Aldi Talk",o:"3Go",p:9.99,url:"https://www.alditalk.de"},
+      {n:"Freenet Smart",o:"50Go",p:9.99,url:"https://www.freenet.de"},
+      {n:"Congstar S",o:"5Go",p:10,url:"https://www.congstar.de"},
+      {n:"Telekom",o:"MagentaMobil Family",p:60,fam:true,minPeople:3,pPerPerson:20,famTag:"3 pers.",url:"https://www.telekom.de"},
+    ],
+    ES:[
+      {n:"Digi Mobil",o:"25Go",p:5,url:"https://www.digimobil.es"},
+      {n:"Simyo",o:"15Go",p:9,url:"https://www.simyo.es"},
+      {n:"Lebara ES",o:"10Go",p:8,url:"https://mobile.lebara.com/es"},
+    ],
+    IT:[
+      {n:"Iliad",o:"Giga 150",p:9.99,url:"https://www.iliad.it"},
+      {n:"Kena Mobile",o:"130Go",p:7.99,url:"https://www.kenamobile.it"},
+      {n:"Very Mobile",o:"200Go",p:7.99,url:"https://www.very.it"},
+    ],
+    UK:[
+      {n:"SMARTY",o:"Unlimited",p:18,url:"https://smarty.co.uk"},
+      {n:"Giffgaff",o:"80Go",p:15,url:"https://www.giffgaff.com"},
+      {n:"VOXI",o:"30Go",p:12,url:"https://www.voxi.co.uk"},
+      {n:"Vodafone",o:"Family plan 3 lines",p:45,fam:true,minPeople:3,pPerPerson:15,famTag:"3 lines",url:"https://www.vodafone.co.uk"},
+    ],
+    PT:[
+      {n:"Nowo Mobile",o:"5Go",p:7.99,url:"https://www.nowo.pt"},
+      {n:"Lycamobile",o:"10Go",p:9.99,url:"https://www.lycamobile.pt"},
+    ],
+    US:[
+      {n:"Mint Mobile",o:"Unlimited",p:30,url:"https://www.mintmobile.com"},
+      {n:"Visible",o:"Unlimited",p:25,url:"https://www.visible.com"},
+      {n:"Cricket",o:"5Go",p:25,url:"https://www.cricketwireless.com"},
+      {n:"T-Mobile",o:"Magenta Family 4 lines",p:100,fam:true,minPeople:4,pPerPerson:25,famTag:"4 lines",url:"https://www.t-mobile.com"},
+      {n:"Cricket",o:"Family 5 lines",p:100,fam:true,minPeople:5,pPerPerson:20,famTag:"5 lines",url:"https://www.cricketwireless.com"},
+    ],
+    CA:[
+      {n:"Public Mobile",o:"15Go",p:25,url:"https://www.publicmobile.ca"},
+      {n:"Fizz",o:"3Go",p:19,url:"https://www.fizzwireless.ca"},
+      {n:"Koodo",o:"Tab Family",p:65,fam:true,minPeople:3,pPerPerson:22,famTag:"3 pers.",url:"https://www.koodomobile.com"},
+    ],
+    MA:[
+      {n:"Inwi Max",o:"20Go",p:49,url:"https://www.inwi.ma"},
+      {n:"Orange Yaou",o:"10Go",p:39,url:"https://www.orange.ma"},
+    ],
+  },
+  internet: {
+    FR:[
+      {n:"Free",o:"Freebox Pop – Fibre 1Gb/s",p:29.99,url:"https://www.free.fr/freebox"},
+      {n:"RED by SFR",o:"Fibre 500Mb/s",p:27.99,url:"https://www.red-by-sfr.fr"},
+      {n:"Bouygues Bbox",o:"Fibre 1Gb/s",p:27.99,url:"https://www.bouyguestelecom.fr/offres-internet"},
+      {n:"SFR Box",o:"Fibre 1Gb/s",p:27.99,url:"https://www.sfr.fr/offre-internet"},
+      {n:"Orange Livebox",o:"Fibre 600Mb/s",p:37.99,url:"https://boutique.orange.fr/internet"},
+    ],
+    BE:[
+      {n:"Scarlet",o:"Fibre 200Mb/s",p:35,url:"https://www.scarlet.be"},
+      {n:"EDPnet",o:"200Mb/s",p:39,url:"https://www.edpnet.be"},
+    ],
+    CH:[
+      {n:"Init7",o:"Fiber7 1Gb/s",p:65,url:"https://www.init7.net"},
+      {n:"Sunrise",o:"Home S",p:49,url:"https://www.sunrise.ch"},
+    ],
+    DE:[
+      {n:"1&1",o:"Fiber 1000",p:29.99,url:"https://www.1und1.de"},
+      {n:"O2 DSL",o:"50Mb/s",p:24.99,url:"https://www.o2online.de"},
+    ],
+    ES:[
+      {n:"Digi Spain",o:"Fibra 1Gb/s",p:16.95,url:"https://www.digimobil.es"},
+      {n:"Lowi",o:"600Mb/s",p:22.95,url:"https://www.lowi.es"},
+    ],
+    IT:[
+      {n:"Iliad Fibra",o:"Fibra 5Gb/s",p:23.99,url:"https://www.iliad.it"},
+      {n:"WINDTRE",o:"Super Fibra",p:26.99,url:"https://www.windtre.it"},
+    ],
+    UK:[
+      {n:"Cuckoo",o:"100Mb/s",p:22,url:"https://www.cuckoo.co.uk"},
+      {n:"Hyperoptic",o:"150Mb/s",p:22,url:"https://www.hyperoptic.com"},
+    ],
+    PT:[
+      {n:"Nowo",o:"Fibra 200Mb/s",p:19.99,url:"https://www.nowo.pt"},
+      {n:"NOS",o:"100Mb/s",p:24.99,url:"https://www.nos.pt"},
+    ],
+    US:[{n:"Xfinity",o:"75Mb/s",p:30,url:"https://www.xfinity.com"}],
+    CA:[{n:"Teksavvy",o:"150Mb/s",p:44.95,url:"https://www.teksavvy.com"}],
+    MA:[
+      {n:"Maroc Telecom",o:"4Mb/s ADSL",p:99,url:"https://www.iam.ma"},
+      {n:"Inwi Box",o:"4G Box",p:149,url:"https://www.inwi.ma"},
+    ],
+  },
+  netflix: {
+    FR:[
+      {n:"Netflix Essentiel",o:"1 écran HD",p:5.99,url:"https://www.netflix.com/fr"},
+      {n:"Netflix Standard",o:"2 écrans FHD",p:13.49,url:"https://www.netflix.com/fr"},
+      {n:"Netflix Premium",o:"4 écrans 4K – idéal famille",p:19.99,fam:true,minPeople:3,pPerPerson:5,famTag:"jusqu'à 4",url:"https://www.netflix.com/fr"},
+      {n:"Molotov Plus",o:"Films & séries FR",p:3.99,url:"https://www.molotov.tv"},
+      {n:"OCS",o:"Films & séries",p:11.99,url:"https://www.ocs.fr"},
+    ],
+    BE:[
+      {n:"Netflix Essentiel",o:"1 écran",p:5.99,url:"https://www.netflix.com/be"},
+      {n:"Netflix Premium",o:"4 écrans",p:19.99,fam:true,minPeople:3,pPerPerson:5,famTag:"4 écrans",url:"https://www.netflix.com/be"},
+    ],
+    CH:[
+      {n:"Netflix Essentiel",o:"1 écran",p:7.99,url:"https://www.netflix.com/ch"},
+      {n:"Netflix Premium",o:"4 écrans",p:25.99,fam:true,minPeople:3,pPerPerson:6.5,famTag:"4 écrans",url:"https://www.netflix.com/ch"},
+    ],
+    DE:[
+      {n:"Netflix Essentiel",o:"1 Bildschirm",p:4.99,url:"https://www.netflix.com/de"},
+      {n:"Netflix Premium",o:"4 Bildschirme",p:17.99,fam:true,minPeople:3,pPerPerson:4.5,famTag:"4 Bildschirme",url:"https://www.netflix.com/de"},
+    ],
+    ES:[
+      {n:"Netflix Essentiel",o:"1 pantalla",p:5.49,url:"https://www.netflix.com/es"},
+      {n:"Netflix Premium",o:"4 pantallas",p:17.99,fam:true,minPeople:3,pPerPerson:4.5,famTag:"4 pantallas",url:"https://www.netflix.com/es"},
+    ],
+    IT:[
+      {n:"Netflix Essentiel",o:"1 schermo",p:5.49,url:"https://www.netflix.com/it"},
+      {n:"Netflix Premium",o:"4 schermi",p:17.99,fam:true,minPeople:3,pPerPerson:4.5,famTag:"4 schermi",url:"https://www.netflix.com/it"},
+    ],
+    UK:[
+      {n:"Netflix Standard",o:"2 screens",p:13.99,url:"https://www.netflix.com/gb"},
+      {n:"Netflix Premium",o:"4 screens",p:17.99,fam:true,minPeople:3,pPerPerson:4.5,famTag:"4 screens",url:"https://www.netflix.com/gb"},
+    ],
+    PT:[
+      {n:"Netflix Essentiel",o:"1 ecrã",p:4.99,url:"https://www.netflix.com/pt"},
+      {n:"Netflix Premium",o:"4 ecrãs",p:15.99,fam:true,minPeople:3,pPerPerson:4,famTag:"4 ecrãs",url:"https://www.netflix.com/pt"},
+    ],
+    US:[
+      {n:"Netflix Standard",o:"2 screens",p:15.49,url:"https://www.netflix.com"},
+      {n:"Netflix Premium",o:"4 screens",p:22.99,fam:true,minPeople:3,pPerPerson:5.75,famTag:"4 screens",url:"https://www.netflix.com"},
+    ],
+    CA:[
+      {n:"Netflix Standard",o:"2 screens",p:16.49,url:"https://www.netflix.com/ca"},
+      {n:"Netflix Premium",o:"4 screens",p:20.99,fam:true,minPeople:3,pPerPerson:5.25,famTag:"4 screens",url:"https://www.netflix.com/ca"},
+    ],
+    MA:[{n:"Netflix Mobile",o:"Mobile only",p:29,url:"https://www.netflix.com/ma"}],
+  },
+  spotify: {
+    FR:[
+      {n:"Spotify Individual",o:"Premium",p:10.99,url:"https://www.spotify.com/fr/premium"},
+      {n:"Spotify Duo",o:"2 comptes Premium",p:14.99,fam:true,minPeople:2,pPerPerson:7.50,famTag:"2 pers.",url:"https://www.spotify.com/fr/duo"},
+      {n:"Spotify Famille",o:"6 comptes Premium",p:17.99,fam:true,minPeople:3,pPerPerson:3,famTag:"jusqu'à 6",url:"https://www.spotify.com/fr/family"},
+      {n:"YouTube Music",o:"Famille – 6 comptes",p:17.99,fam:true,minPeople:3,pPerPerson:3,famTag:"jusqu'à 6",url:"https://music.youtube.com"},
+      {n:"Deezer Famille",o:"6 comptes Premium",p:17.99,fam:true,minPeople:3,pPerPerson:3,famTag:"jusqu'à 6",url:"https://www.deezer.com/fr/offers/family"},
+      {n:"Amazon Music",o:"Unlimited",p:9.99,url:"https://music.amazon.fr"},
+    ],
+    BE:[
+      {n:"Spotify",o:"Premium",p:10.99,url:"https://www.spotify.com/be"},
+      {n:"Spotify Famille",o:"6 comptes",p:17.99,fam:true,minPeople:3,pPerPerson:3,famTag:"6 comptes",url:"https://www.spotify.com/be/family"},
+    ],
+    CH:[
+      {n:"Spotify",o:"Premium",p:12.95,url:"https://www.spotify.com/ch"},
+      {n:"Spotify Famille",o:"6 comptes",p:20.95,fam:true,minPeople:3,pPerPerson:3.5,famTag:"6 comptes",url:"https://www.spotify.com/ch/family"},
+    ],
+    DE:[
+      {n:"Spotify",o:"Premium",p:9.99,url:"https://www.spotify.com/de"},
+      {n:"Spotify Familie",o:"6 Konten",p:14.99,fam:true,minPeople:3,pPerPerson:2.5,famTag:"6 Konten",url:"https://www.spotify.com/de/family"},
+    ],
+    ES:[
+      {n:"Spotify",o:"Premium",p:9.99,url:"https://www.spotify.com/es"},
+      {n:"Spotify Familia",o:"6 cuentas",p:14.99,fam:true,minPeople:3,pPerPerson:2.5,famTag:"6 cuentas",url:"https://www.spotify.com/es/family"},
+    ],
+    IT:[
+      {n:"Spotify",o:"Premium",p:9.99,url:"https://www.spotify.com/it"},
+      {n:"Spotify Famiglia",o:"6 account",p:14.99,fam:true,minPeople:3,pPerPerson:2.5,famTag:"6 account",url:"https://www.spotify.com/it/family"},
+    ],
+    UK:[
+      {n:"Spotify",o:"Premium",p:11.99,url:"https://www.spotify.com/uk"},
+      {n:"Spotify Family",o:"6 accounts",p:17.99,fam:true,minPeople:3,pPerPerson:3,famTag:"6 accounts",url:"https://www.spotify.com/uk/family"},
+    ],
+    PT:[
+      {n:"Spotify",o:"Premium",p:9.99,url:"https://www.spotify.com/pt"},
+      {n:"Spotify Família",o:"6 contas",p:14.99,fam:true,minPeople:3,pPerPerson:2.5,famTag:"6 contas",url:"https://www.spotify.com/pt/family"},
+    ],
+    US:[
+      {n:"Spotify",o:"Premium",p:10.99,url:"https://www.spotify.com"},
+      {n:"Spotify Family",o:"6 accounts",p:16.99,fam:true,minPeople:3,pPerPerson:2.83,famTag:"6 accounts",url:"https://www.spotify.com/family"},
+    ],
+    CA:[
+      {n:"Spotify",o:"Premium",p:11.99,url:"https://www.spotify.com/ca"},
+      {n:"Spotify Family",o:"6 accounts",p:17.99,fam:true,minPeople:3,pPerPerson:3,famTag:"6 accounts",url:"https://www.spotify.com/ca/family"},
+    ],
+    MA:[{n:"Spotify",o:"Premium",p:29.99,url:"https://www.spotify.com/ma"}],
+  },
+  bank: {
+    FR:[
+      {n:"Boursorama Bienvenue",o:"CB gratuite",p:0,url:"https://www.boursorama.com/banque/compte-courant"},
+      {n:"Fortuneo Fosfo",o:"CB gratuite",p:0,url:"https://www.fortuneo.fr/compte-courant"},
+      {n:"Hello bank! One",o:"CB gratuite",p:0,url:"https://www.hellobank.fr"},
+      {n:"Revolut Standard",o:"CB gratuite",p:0,url:"https://www.revolut.com/fr-FR"},
+      {n:"N26 Standard",o:"CB gratuite",p:0,url:"https://n26.com/fr-fr"},
+    ],
+    BE:[
+      {n:"N26 Standard",o:"CB gratuite",p:0,url:"https://n26.com/fr-be"},
+      {n:"Revolut",o:"Standard gratuit",p:0,url:"https://www.revolut.com/fr-BE"},
+    ],
+    CH:[
+      {n:"Neon",o:"CB CHF gratuite",p:0,url:"https://www.neon-free.ch"},
+      {n:"Yuh",o:"Compte gratuit",p:0,url:"https://www.yuh.com"},
+    ],
+    DE:[
+      {n:"N26 Standard",o:"Kostenlos",p:0,url:"https://n26.com/de-de"},
+      {n:"DKB",o:"Girokonto gratis",p:0,url:"https://www.dkb.de"},
+    ],
+    ES:[
+      {n:"ING Direct",o:"Cuenta NÓMINA",p:0,url:"https://www.ing.es"},
+      {n:"Revolut",o:"Standard gratis",p:0,url:"https://www.revolut.com/es-ES"},
+    ],
+    IT:[
+      {n:"N26 Standard",o:"Conto gratuito",p:0,url:"https://n26.com/it-it"},
+      {n:"Revolut",o:"Standard gratis",p:0,url:"https://www.revolut.com/it-IT"},
+    ],
+    UK:[
+      {n:"Monzo",o:"Free account",p:0,url:"https://monzo.com"},
+      {n:"Starling Bank",o:"Free account",p:0,url:"https://www.starlingbank.com"},
+    ],
+    PT:[{n:"ActivoBank",o:"Conta grátis",p:0,url:"https://www.activobank.pt"}],
+    US:[
+      {n:"Ally Bank",o:"Free checking",p:0,url:"https://www.ally.com"},
+      {n:"Chime",o:"Free account",p:0,url:"https://www.chime.com"},
+    ],
+    CA:[{n:"EQ Bank",o:"Free chequing",p:0,url:"https://www.eqbank.ca"}],
+    MA:[{n:"CIH Bank",o:"Compte digital",p:20,url:"https://www.cih.co.ma"}],
+  },
+  electricity: {
+    FR:[
+      {n:"Octopus Energy",o:"Flex – prix marché",p:null,tip:"Économisez 10-20% vs EDF",url:"https://octopusenergy.fr"},
+      {n:"Ekwateur",o:"Électricité verte",p:null,tip:"Tarif compétitif + renouvelable",url:"https://ekwateur.fr"},
+      {n:"Ilek",o:"100% renouvelable",p:null,tip:"Options flexibles",url:"https://www.ilek.fr"},
+      {n:"TotalEnergies",o:"Offre Classique",p:null,tip:"Abonnement fixe attractif",url:"https://particuliers.totalenergies.fr"},
+    ],
+    BE:[
+      {n:"Luminus Easy",o:"Green",p:null,tip:"Verte et compétitive",url:"https://www.luminus.be"},
+      {n:"Eneco",o:"Tarif fixe",p:null,tip:"12 mois fixes",url:"https://www.eneco.be"},
+    ],
+    CH:[{n:"Energie 360°",o:"Strom natur",p:null,tip:"Renouvelable certifiée",url:"https://www.energie360.ch"}],
+    DE:[
+      {n:"Tibber",o:"Spot price",p:null,tip:"Idéal avec compteur intelligent",url:"https://tibber.com/de"},
+      {n:"Lichtblick",o:"Ökostrom",p:null,tip:"100% renouvelable",url:"https://www.lichtblick.de"},
+    ],
+    UK:[{n:"Octopus Energy",o:"Agile Octopus",p:null,tip:"Dynamic pricing, save 30%",url:"https://octopusenergy.com"}],
+    ES:[{n:"Holaluz",o:"100% renovable",p:null,tip:"Precio competitivo fijo",url:"https://www.holaluz.com"}],
+    IT:[{n:"Octopus IT",o:"Offerta mercato",p:null,tip:"Prezzi competitivi",url:"https://octopusenergy.it"}],
+    PT:[{n:"Goldenergy",o:"Simples",p:null,tip:"Tarifa competitiva",url:"https://www.goldenergy.pt"}],
+    US:[{n:"Green Mountain",o:"Renewable",p:null,tip:"Green energy option",url:"https://www.greenmountainenergy.com"}],
+    CA:[{n:"Bullfrog Power",o:"Green",p:null,tip:"100% renouvelable",url:"https://www.bullfrogpower.com"}],
+    MA:[{n:"ONE",o:"Tarif réglementé",p:null,tip:"Tarif fixe réglementé",url:"https://www.one.org.ma"}],
+  },
+  gym: {
+    FR:[
+      {n:"Basic-Fit",o:"Classic 1 club",p:19.99,url:"https://www.basic-fit.com/fr-fr"},
+      {n:"Fitness Park",o:"Essentiel",p:14.99,url:"https://www.fitnesspark.fr"},
+      {n:"Neoness",o:"Liberté",p:9.99,url:"https://www.neoness.com"},
+      {n:"Keep Cool",o:"Freedom",p:9.90,url:"https://www.keepcool.fr"},
+      {n:"Basic-Fit",o:"Duo – 2 personnes",p:29.99,fam:true,minPeople:2,pPerPerson:15,famTag:"2 pers.",url:"https://www.basic-fit.com/fr-fr"},
+      {n:"YouTube Fitness",o:"Cours en ligne gratuits",p:0,tip:"Milliers de cours gratuits",url:"https://www.youtube.com/results?search_query=fitness+workout"},
+    ],
+    BE:[
+      {n:"Basic-Fit BE",o:"Classic",p:19.99,url:"https://www.basic-fit.com/fr-be"},
+      {n:"Anytime Fitness",o:"Standard",p:40,url:"https://www.anytimefitness.be"},
+    ],
+    CH:[
+      {n:"Migros Fitness",o:"Solo Abo",p:55,url:"https://www.migros-fitnesscenter.ch"},
+      {n:"Clever Fit",o:"Basic",p:29,url:"https://www.clever-fit.com"},
+    ],
+    DE:[
+      {n:"McFit",o:"Basic",p:19.90,url:"https://www.mcfit.com"},
+      {n:"FitX M",o:"Standard",p:17.99,url:"https://www.fitx.de"},
+    ],
+    ES:[
+      {n:"Basic-Fit ES",o:"Classic",p:19.99,url:"https://www.basic-fit.com/es-es"},
+      {n:"VivaGym",o:"Basic",p:14.99,url:"https://www.vivagym.es"},
+    ],
+    IT:[
+      {n:"Technogym",o:"Digital",p:14.99,url:"https://www.technogym.com"},
+      {n:"Nuvola",o:"Base",p:19.99,url:"https://www.nuvolapalestre.it"},
+    ],
+    UK:[
+      {n:"PureGym",o:"No contract",p:19.99,url:"https://www.puregym.com"},
+      {n:"The Gym Group",o:"Off-Peak",p:10.99,url:"https://www.thegymgroup.com"},
+      {n:"The Gym Group",o:"Family off-peak",p:18,fam:true,minPeople:2,pPerPerson:9,famTag:"2+ pers.",url:"https://www.thegymgroup.com"},
+    ],
+    PT:[
+      {n:"Holmes Place",o:"Light",p:29.99,url:"https://www.holmesplace.pt"},
+      {n:"Fitness Hut",o:"Base",p:19.99,url:"https://www.fitnesshut.pt"},
+    ],
+    US:[
+      {n:"Planet Fitness",o:"Classic",p:10,url:"https://www.planetfitness.com"},
+      {n:"Crunch Fitness",o:"Base",p:9.99,url:"https://www.crunch.com"},
+      {n:"Planet Fitness",o:"Family – 2 members",p:15,fam:true,minPeople:2,pPerPerson:7.5,famTag:"2 pers.",url:"https://www.planetfitness.com"},
+    ],
+    CA:[{n:"GoodLife",o:"Basic",p:24.99,url:"https://www.goodlifefitness.com"}],
+    MA:[{n:"GoSport Club",o:"Mensuel",p:200,url:"https://www.gosport.ma"}],
+  },
+  amazon: {
+    FR:[
+      {n:"Amazon Prime",o:"Mensuel",p:6.99,url:"https://www.amazon.fr/prime"},
+      {n:"Amazon Prime",o:"Annuel (≈4.92€/mois)",p:4.92,url:"https://www.amazon.fr/prime"},
+      {n:"Amazon Prime",o:"Partagé – profil famille",p:4.92,fam:true,minPeople:2,pPerPerson:2.46,famTag:"profil famille",tip:"Partagez l'abonnement annuel (2 adultes + enfants)",url:"https://www.amazon.fr/gp/help/customer/display.html?nodeId=201380860"},
+    ],
+    BE:[{n:"Amazon Prime BE",o:"Mensuel",p:5.99,url:"https://www.amazon.com.be/prime"}],
+    CH:[{n:"Amazon Prime CH",o:"Mensuel",p:12.90,url:"https://www.amazon.de/prime"}],
+    DE:[
+      {n:"Amazon Prime DE",o:"Monatlich",p:8.99,url:"https://www.amazon.de/prime"},
+      {n:"Amazon Prime DE",o:"Famille (annuel)",p:7.99,fam:true,minPeople:2,pPerPerson:4,famTag:"famille",url:"https://www.amazon.de/prime"},
+    ],
+    ES:[{n:"Amazon Prime ES",o:"Mensual",p:4.99,url:"https://www.amazon.es/prime"}],
+    IT:[{n:"Amazon Prime IT",o:"Mensile",p:4.99,url:"https://www.amazon.it/prime"}],
+    UK:[{n:"Amazon Prime UK",o:"Monthly",p:8.99,url:"https://www.amazon.co.uk/prime"}],
+    PT:[{n:"Amazon Prime PT",o:"Mensal",p:4.99,url:"https://www.amazon.es/prime"}],
+    US:[
+      {n:"Amazon Prime US",o:"Monthly",p:14.99,url:"https://www.amazon.com/prime"},
+      {n:"Amazon Prime US",o:"Family shared",p:14.99,fam:true,minPeople:2,pPerPerson:7.5,famTag:"shared",url:"https://www.amazon.com/gp/help/customer/display.html?nodeId=201380860"},
+    ],
+    CA:[{n:"Amazon Prime CA",o:"Monthly",p:9.99,url:"https://www.amazon.ca/prime"}],
+    MA:[],
+  },
+};
+
+const AVG = {
+  mobile:{FR:30,BE:40,CH:60,DE:25,ES:20,IT:15,UK:22,PT:18,US:55,CA:65,MA:80,_:35},
+  internet:{FR:38,BE:55,CH:75,DE:38,ES:28,IT:30,UK:38,PT:28,US:65,CA:75,MA:130,_:50},
+  netflix:{FR:15,BE:15,CH:18,DE:14,ES:14,IT:14,UK:18,PT:14,US:20,CA:20,MA:45,_:16},
+  spotify:{FR:11,BE:11,CH:13,DE:10,ES:10,IT:10,UK:12,PT:10,US:11,CA:12,MA:30,_:11},
+  bank:{FR:9,BE:9,CH:12,DE:9,ES:9,IT:9,UK:6,PT:9,US:18,CA:18,MA:30,_:12},
+  electricity:{FR:85,BE:130,CH:130,DE:130,ES:85,IT:90,UK:110,PT:75,US:125,CA:110,MA:65,_:100},
+  gym:{FR:45,BE:55,CH:90,DE:40,ES:40,IT:40,UK:45,PT:40,US:45,CA:55,MA:350,_:50},
+  amazon:{FR:7,BE:6,CH:13,DE:9,ES:5,IT:5,UK:9,PT:5,US:15,CA:10,MA:5,_:8},
+};
+
+const CATS = [
+  {id:'telecom',name:'Télécom & Internet',icon:'📱',color:'#2563eb',bg:'#eff6ff',
+   items:[
+     {id:'mobile',name:'Forfait mobile',icon:'📱',ph:'ex: 30', perPerson:true},   // 1 ligne par personne
+     {id:'internet',name:'Box / Internet',icon:'🌐',ph:'ex: 35', perPerson:false}, // partagé foyer
+   ]},
+  {id:'streaming',name:'Streaming & Médias',icon:'🎬',color:'#dc2626',bg:'#fef2f2',
+   items:[
+     {id:'netflix',name:'Netflix / VOD',icon:'📺',ph:'ex: 18', perPerson:false},   // partagé
+     {id:'spotify',name:'Spotify / Musique',icon:'🎵',ph:'ex: 10.99', perPerson:true}, // 1 compte par pers.
+   ]},
+  {id:'bank',name:'Banque',icon:'🏦',color:'#7c3aed',bg:'#f5f3ff',
+   items:[
+     {id:'bank',name:'Frais bancaires',icon:'💳',ph:'ex: 8', perPerson:true}, // 1 compte par personne
+   ]},
+  {id:'energy',name:'Énergie',icon:'⚡',color:'#d97706',bg:'#fffbeb',
+   items:[
+     {id:'electricity',name:'Électricité',icon:'⚡',ph:'ex: 80', perPerson:false}, // partagé foyer
+   ]},
+  {id:'sport',name:'Sport & Bien-être',icon:'💪',color:'#059669',bg:'#ecfdf5',
+   items:[
+     {id:'gym',name:'Salle de sport',icon:'🏋️',ph:'ex: 50', perPerson:true}, // 1 abonnement par pers.
+   ]},
+  {id:'other',name:'Autres abonnements',icon:'📦',color:'#0891b2',bg:'#ecfeff',
+   items:[
+     {id:'amazon',name:'Amazon Prime',icon:'📦',ph:'ex: 6.99', perPerson:false}, // partagé foyer
+   ]},
+];
+
+const vals = {}; // itemId -> amount
+const customs = []; // {id,catId,name,amount}
+const CAT_COLORS = ['#2563eb','#dc2626','#7c3aed','#d97706','#059669','#0891b2'];
+
+let nbPeople = 1; // current people count
+
+const PEOPLE_LABELS = {
+  1: {main:'Seul(e)',        sub:'Dépenses affichées en total (1 personne)'},
+  2: {main:'En couple',      sub:'2 personnes · coût partagé affiché par personne'},
+  3: {main:'Famille de 3',   sub:'3 personnes · coût partagé affiché par personne'},
+  4: {main:'Famille de 4',   sub:'4 personnes · coût partagé affiché par personne'},
+  5: {main:'Famille de 5',   sub:'5 personnes · coût partagé affiché par personne'},
+  6: {main:'Famille de 6',   sub:'6 personnes · coût partagé affiché par personne'},
+};
+
+function changePeople(delta) {
+  nbPeople = Math.max(1, Math.min(6, nbPeople + delta));
+  updatePeopleUI();
+  // Refresh all alt panels and totals
+  CATS.forEach(cat => renderRows(cat.id));
+  updateTotals();
+}
+
+function updatePeopleUI() {
+  document.getElementById('people-num').textContent = nbPeople;
+  const lbl = PEOPLE_LABELS[nbPeople] || {main:`Famille de ${nbPeople}`, sub:`${nbPeople} personnes`};
+  document.getElementById('people-label-main').textContent = lbl.main;
+  document.getElementById('people-label-sub').textContent = lbl.sub;
+
+  // Avatars
+  const avatars = document.querySelectorAll('.avatar');
+  avatars.forEach((a, i) => { a.classList.toggle('faded', i >= nbPeople); });
+
+  // Per person pill
+  const pill = document.getElementById('per-person-pill');
+  if (nbPeople > 1) {
+    pill.style.display = 'flex';
+    const grand = getTotalGrand();
+    document.getElementById('per-person-val').textContent = (grand / nbPeople).toFixed(2) + ' €';
+  } else {
+    pill.style.display = 'none';
+  }
+}
+
+function getTotalGrand() {
+  let g = 0;
+  CATS.forEach(cat => {
+    g += cat.items.reduce((a,it) => a + (parseFloat(vals[it.id])||0), 0)
+      + customs.filter(c=>c.catId===cat.id).reduce((a,c) => a + (c.amount||0), 0);
+  });
+  return g;
+}
+
+function country() { return document.getElementById('sel-country').value; }
+
+function getAlts(itemId) {
+  const d = MKT[itemId]; if(!d) return [];
+  return d[country()] || d['FR'] || [];
+}
+function getAvg(itemId) {
+  const d = AVG[itemId]; if(!d) return 999;
+  return d[country()] || d['_'] || 50;
+}
+
+// =====================
+// RENDER
+// =====================
+function renderAll() {
+  const wrap = document.getElementById('cats-wrap');
+  wrap.innerHTML = '';
+  CATS.forEach(cat => {
+    const el = document.createElement('div');
+    el.className = 'cat-block open';
+    el.id = 'block-'+cat.id;
+    el.innerHTML = `
+      <div class="cat-head" onclick="toggleBlock('${cat.id}')">
+        <div class="cat-emoji" style="background:${cat.bg};color:${cat.color}">${cat.icon}</div>
+        <div class="cat-label">
+          <div class="cat-name">${cat.name}</div>
+          <div class="cat-count" id="cnt-${cat.id}">${cat.items.length} poste${cat.items.length>1?'s':''}</div>
+        </div>
+        <div class="cat-sum" id="catsum-${cat.id}" style="color:${cat.color}">—</div>
+        <div class="cat-arrow">▼</div>
+      </div>
+      <div class="cat-body" id="body-${cat.id}">
+        <div id="rows-${cat.id}"></div>
+        <button class="btn-add-r" onclick="addCustom('${cat.id}')">＋ Ajouter un poste</button>
+      </div>
+    `;
+    wrap.appendChild(el);
+    renderRows(cat.id);
+  });
+  updateTotals();
+}
+
+function renderRows(catId) {
+  const cat = CATS.find(c=>c.id===catId);
+  const wrap = document.getElementById('rows-'+catId);
+  if(!cat||!wrap) return;
+  wrap.innerHTML = '';
+  cat.items.forEach(item => appendRow(wrap, item.id, item.name, item.icon, item.ph, false, catId));
+  customs.filter(c=>c.catId===catId).forEach(c => appendRow(wrap, c.id, c.name, '📌', '0', true, catId));
+}
+
+function appendRow(wrap, itemId, name, icon, ph, isCustom, catId) {
+  const v = isCustom
+    ? (customs.find(c=>c.id===itemId)||{}).amount||0
+    : (parseFloat(vals[itemId])||0);
+  const avg = getAvg(itemId);
+  const status = v===0?'': v<=avg*0.8?'ok': v<=avg*1.2?'warn':'bad';
+  const alts = getAlts(itemId);
+  const showAlts = v>0 && alts.length>0;
+
+  const div = document.createElement('div');
+  div.innerHTML = `
+    <div class="exp-row">
+      <div class="exp-status ${status}" id="st-${itemId}"></div>
+      <div class="exp-left">
+        <div class="exp-icon">${icon}</div>
+        <div class="exp-name-wrap">
+          <div class="exp-lbl">${isCustom?'<input class="exp-name-in" value="'+name+'" placeholder="Nom" oninput="updateCustName(\''+itemId+'\',this.value)">':name}</div>
+        </div>
+      </div>
+      <div class="exp-right">
+        <div class="exp-amt">
+          <span class="exp-cur">€</span>
+          <input class="exp-amt-in" type="number" min="0" step="0.01" value="${v||''}" placeholder="${ph}"
+            oninput="${isCustom?'onCustAmt(\''+itemId+'\',\''+catId+'\',this.value)':'onAmt(\''+itemId+'\',\''+catId+'\',this.value)'}">
+        </div>
+        <button class="exp-del" onclick="${isCustom?'delCustom(\''+itemId+'\',\''+catId+'\')':'clearAmt(\''+itemId+'\',\''+catId+'\')'}">✕</button>
+      </div>
+    </div>
+    <div class="exp-alts${showAlts?' show':''}" id="alts-${itemId}">
+      ${showAlts?buildAltsHTML(itemId,v):''}
+    </div>
+  `;
+  wrap.appendChild(div);
+}
+
+// Is this item a "per person" type (1 subscription per person) or "shared" (1 for the household)?
+function isPerPersonItem(itemId) {
+  for (const cat of CATS) {
+    const it = cat.items.find(i => i.id === itemId);
+    if (it) return it.perPerson === true;
+  }
+  return false; // custom items default to shared
+}
+
+function buildAltsHTML(itemId, currentVal) {
+  const allAlts = getAlts(itemId);
+  const alts = allAlts
+    .filter(a => !a.fam || nbPeople >= (a.minPeople || 2));
+  if (!alts.length) return '';
+
+  const perPerson = isPerPersonItem(itemId);
+  const n = nbPeople;
+
+  // For a per-person item: the displayed unit price is the new price per person
+  // For a shared item: the displayed unit price is the total (same for everyone)
+  const displayPrice = (a) => {
+    if (a.p === null) return null;
+    if (a.fam && a.pPerPerson != null) return a.pPerPerson; // family offer always shows per-person
+    return a.p; // unit price (per person for perPerson items, total for shared)
+  };
+
+  // Total foyer new cost
+  const totalNewCost = (a) => {
+    if (a.p === null) return null;
+    if (a.fam) return a.p; // family pack = one price for whole household
+    return perPerson ? a.p * n : a.p; // per-person × n, or shared stays flat
+  };
+
+  // What user currently pays total for this item
+  const totalOldCost = currentVal; // always the full amount entered
+
+  // Per-person ref for chip saving display
+  const perPersonOldCost = perPerson ? currentVal / n : currentVal;
+
+  const withPrice = alts.filter(a => a.p !== null);
+  // Sort cheapest by total foyer cost
+  const cheapest = withPrice.length
+    ? [...withPrice].sort((a, b) => (totalNewCost(a) ?? 999) - (totalNewCost(b) ?? 999))[0]
+    : null;
+
+  let catIcon = '📌';
+  CATS.forEach(cat => { if (cat.items.find(it => it.id === itemId)) catIcon = cat.icon; });
+
+  let html = `
+    <div class="alts-hd">
+      <div class="alts-hd-left">💡 Alternatives${n > 1 ? ` · ${perPerson ? n+' forfaits indiv.' : 'abonnement partagé'}` : ''}</div>
+      <div class="alts-disclaimer">⚠️ Prix indicatifs — vérifier sur le site</div>
+    </div>
+    <div class="alts-scroll-wrap">
+    <div class="alts-scroll">`;
+
+  alts.forEach(alt => {
+    const isBest = cheapest && alt.n === cheapest.n && alt.o === cheapest.o;
+    const dp = displayPrice(alt);               // unit price shown on chip
+    const tnc = totalNewCost(alt);              // total foyer cost with this offer
+    const chipSaving = tnc !== null ? totalOldCost - tnc : null; // total foyer saving
+
+    const planId = `${itemId}_${alt.n}_${alt.o}`.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+    const alreadyAdded = savingsPlan.find(s => s.id === planId);
+
+    // Label to explain what the price represents
+    let priceLabel = '/mois';
+    if (alt.fam) priceLabel = '/pers. (forfait famille)';
+    else if (perPerson && n > 1) priceLabel = `/pers. × ${n} = ${tnc !== null ? tnc.toFixed(2)+' €' : '?'} total`;
+
+    html += `<div class="alt-chip${isBest ? ' best' : ''}">
+      ${isBest ? '<div class="best-badge">Meilleur prix</div>' : ''}
+      ${alt.fam ? `<div class="family-badge">👨‍👩‍👧 ${alt.famTag || 'Famille'}</div>` : ''}
+      <div class="chip-name">${alt.n}</div>
+      <div class="chip-offer">${alt.o}</div>
+      ${dp !== null ? `
+        <div class="chip-price">${dp.toFixed(2)} €<span style="font-size:11px;font-weight:400;color:var(--muted)"> ${priceLabel}</span></div>
+        ${chipSaving !== null && chipSaving > 0.5 ? `<div class="chip-save">−${chipSaving.toFixed(2)} € économisés/mois (foyer)</div>` : ''}
+        ${chipSaving !== null && chipSaving <= 0.5 && chipSaving > -0.5 ? `<div class="chip-neutral">Prix similaire ≈</div>` : ''}
+        ${chipSaving !== null && chipSaving <= -0.5 ? `<div class="chip-neutral">Vous payez déjà moins ✓</div>` : ''}
+        ${alt.tip ? `<div class="chip-tip">💡 ${alt.tip}</div>` : ''}
+      ` : `<div class="chip-tip">💡 ${alt.tip || 'Tarif variable selon consommation'}</div>`}
+      ${alt.url ? `<a class="chip-visit" href="${alt.url}" target="_blank" rel="noopener">Visiter le site ↗</a>` : ''}
+      ${dp !== null && tnc !== null ? `<button
+          class="chip-add${alreadyAdded ? ' added' : ''}"
+          data-spid="${planId}"
+          onclick="${alreadyAdded ? '' : `addToPlan('${planId}','${alt.n}','${alt.o}',${tnc},${totalOldCost},'${alt.url||''}','${catIcon}',${!!alt.fam},${perPerson},${n})`}"
+        >${alreadyAdded ? '✓ Ajouté au plan' : '+ Ajouter au plan'}</button>` : ''}
+    </div>`;
+  });
+
+  html += '</div></div>';
+  return html;
+}
+
+// =====================
+// EVENTS
+// =====================
+function onAmt(itemId, catId, v) {
+  vals[itemId] = parseFloat(v)||0;
+  refreshRow(itemId, catId, false);
+  updateCatSum(catId);
+  updateTotals();
+}
+function onCustAmt(id, catId, v) {
+  const c = customs.find(x=>x.id===id); if(c) c.amount=parseFloat(v)||0;
+  updateCatSum(catId);
+  updateTotals();
+}
+function updateCustName(id, v) { const c=customs.find(x=>x.id===id); if(c) c.name=v; }
+function clearAmt(itemId, catId) { vals[itemId]=0; refreshRow(itemId,catId,false); updateCatSum(catId); updateTotals(); }
+function delCustom(id, catId) {
+  const idx=customs.findIndex(c=>c.id===id); if(idx>=0) customs.splice(idx,1);
+  renderRows(catId); updateCatSum(catId); updateTotals();
+}
+function addCustom(catId) {
+  customs.push({id:'cst_'+Date.now(), catId, name:'Nouveau poste', amount:0});
+  renderRows(catId);
+}
+function toggleBlock(catId) { document.getElementById('block-'+catId)?.classList.toggle('open'); }
+function onLocChange() { renderAll(); }
+
+function refreshRow(itemId, catId, isCustom) {
+  const cat = CATS.find(c=>c.id===catId);
+  if(!cat) return;
+  // Re-render the specific item row's status and alts only
+  const v = parseFloat(vals[itemId])||0;
+  const avg = getAvg(itemId);
+  const status = v===0?'': v<=avg*0.8?'ok': v<=avg*1.2?'warn':'bad';
+  const st = document.getElementById('st-'+itemId);
+  if(st) { st.className='exp-status '+status; }
+  const altsEl = document.getElementById('alts-'+itemId);
+  if(altsEl) {
+    const alts = getAlts(itemId);
+    if(v>0 && alts.length) {
+      altsEl.innerHTML = buildAltsHTML(itemId, v);
+      altsEl.className = 'exp-alts show';
+    } else {
+      altsEl.innerHTML=''; altsEl.className='exp-alts';
+    }
+  }
+}
+
+// =====================
+// TOTALS & SIDEBAR
+// =====================
+function updateCatSum(catId) {
+  const cat = CATS.find(c=>c.id===catId);
+  if(!cat) return;
+  const s = cat.items.reduce((a,it)=>a+(parseFloat(vals[it.id])||0),0)
+    + customs.filter(c=>c.catId===catId).reduce((a,c)=>a+(c.amount||0),0);
+  const el=document.getElementById('catsum-'+catId);
+  if(el) el.textContent = s>0 ? s.toFixed(2)+' €' : '—';
+}
+
+function updateTotals() {
+  let grand=0;
+  CATS.forEach(cat=>{
+    const s = cat.items.reduce((a,it)=>a+(parseFloat(vals[it.id])||0),0)
+      + customs.filter(c=>c.catId===cat.id).reduce((a,c)=>a+(c.amount||0),0);
+    grand+=s;
+  });
+  document.getElementById('grand-total').textContent=grand.toFixed(2)+' €';
+  document.getElementById('sb-total').textContent=grand.toFixed(2)+' €';
+  // Per person pill
+  if (nbPeople > 1) {
+    document.getElementById('per-person-pill').style.display='flex';
+    document.getElementById('per-person-val').textContent=(grand/nbPeople).toFixed(2)+' €';
+  } else {
+    document.getElementById('per-person-pill').style.display='none';
+  }
+  renderBars(grand);
+  renderGlobalAlts();
+}
+
+function renderBars(grand) {
+  const wrap=document.getElementById('bars');
+  wrap.innerHTML='';
+  CATS.forEach((cat,i)=>{
+    const s=cat.items.reduce((a,it)=>a+(parseFloat(vals[it.id])||0),0)
+      + customs.filter(c=>c.catId===cat.id).reduce((a,c)=>a+(c.amount||0),0);
+    if(!s) return;
+    const pct=grand>0?s/grand*100:0;
+    const d=document.createElement('div');
+    d.className='sum-row';
+    d.innerHTML=`<div class="sum-rh"><div class="sum-rn">${cat.icon} ${cat.name}</div><div class="sum-rv">${s.toFixed(2)} €</div></div><div class="sum-bar"><div class="sum-bf" style="width:${pct}%;background:${CAT_COLORS[i%CAT_COLORS.length]}"></div></div>`;
+    wrap.appendChild(d);
+  });
+}
+
+function renderGlobalAlts() {
+  const list=document.getElementById('ga-list');
+  const sub=document.getElementById('ga-sub');
+  const pill=document.getElementById('pill-save');
+  const pillVal=document.getElementById('pill-save-val');
+  const gains=[];
+
+  const effectivePrice = (a) => {
+    if (a.p === null) return null;
+    if (a.fam && a.pPerPerson) return a.pPerPerson;
+    return nbPeople > 1 ? a.p / nbPeople : a.p;
+  };
+
+  CATS.forEach(cat=>{
+    cat.items.forEach(item=>{
+      const v=parseFloat(vals[item.id])||0; if(!v) return;
+      const allAlts=getAlts(item.id);
+      const eligibleAlts = allAlts.filter(a => a.p !== null && (!a.fam || nbPeople >= (a.minPeople||2)));
+      if(!eligibleAlts.length) return;
+      const perPersonRef = nbPeople > 1 ? v / nbPeople : v;
+      const cheapest = [...eligibleAlts].sort((a,b)=>effectivePrice(a)-effectivePrice(b))[0];
+      const effP = effectivePrice(cheapest);
+      const saving = perPersonRef - effP;
+      if(saving>0.5) gains.push({item,cat,v,cheapest,saving,effP,perPersonRef,isFam:!!cheapest.fam});
+    });
+  });
+
+  gains.sort((a,b)=>b.saving-a.saving);
+
+  if(!gains.length) {
+    list.innerHTML='<div class="no-alt">Saisissez vos dépenses pour voir les économies possibles ✨</div>';
+    sub.textContent='Saisissez vos dépenses pour voir les alternatives';
+    pill.style.display='none';
+    return;
+  }
+
+  const total=gains.reduce((s,g)=>s+g.saving,0);
+  const totalReal = nbPeople > 1 ? total : total; // per person
+  const perPersonLabel = nbPeople > 1 ? `/pers.` : `/mois`;
+  sub.textContent=`${gains.length} économie${gains.length>1?'s':''} · ${total.toFixed(2)} €${perPersonLabel}`;
+  pill.style.display='flex';
+  pillVal.textContent=total.toFixed(2)+` €${perPersonLabel}`;
+
+  list.innerHTML='';
+  gains.slice(0,6).forEach(g=>{
+    const d=document.createElement('div');
+    d.className='ga-item';
+    d.innerHTML=`
+      <div class="ga-ico">${g.item.icon}</div>
+      <div class="ga-inf">
+        <div class="ga-nm">${g.cheapest.n}${g.isFam ? ' <span class="family-badge">👨‍👩‍👧 '+g.cheapest.famTag+'</span>' : ''}</div>
+        <div class="ga-ds">${g.item.name} · ${g.cheapest.o}${nbPeople>1?' · '+g.effP.toFixed(2)+' €/pers.':' · '+g.effP.toFixed(2)+' €'} · au lieu de ${g.perPersonRef.toFixed(2)} €</div>
+        ${g.cheapest.url ? `<a class="ga-visit" href="${g.cheapest.url}" target="_blank" rel="noopener">Voir l'offre ↗</a>` : ''}
+      </div>
+      <div class="ga-sv">
+        <div class="ga-sv-n">−${g.saving.toFixed(2)} €</div>
+        <div class="ga-sv-l">${nbPeople>1?'par pers./mois':'par mois'}</div>
+      </div>`;
+    list.appendChild(d);
+  });
+
+  // Annual summary
+  const totalAllPeople = nbPeople > 1 ? total * nbPeople : total;
+  const ann=document.createElement('div');
+  ann.className='ga-annual';
+  ann.innerHTML=`
+    <div>
+      <div class="ga-an-t">💰 Économies annuelles — foyer complet</div>
+      <div class="ga-an-s">${gains.length} prestataire${gains.length>1?'s':''} · ${nbPeople} personne${nbPeople>1?'s':''}</div>
+    </div>
+    <div>
+      <div class="ga-an-v">${(totalAllPeople*12).toFixed(0)} €</div>
+      ${nbPeople>1?`<div style="font-size:11px;color:#4a9a6a;text-align:right">${(total*12).toFixed(0)} € / pers.</div>`:''}
+    </div>`;
+  list.appendChild(ann);
+}
+
+// =====================
+// DRAG-TO-SCROLL on all .alts-scroll containers
+// =====================
+(function() {
+  let activeScroll = null;
+  let startX = 0;
+  let scrollLeft = 0;
+  let isDragging = false; // true only after moving >5px
+
+  function onMouseDown(e) {
+    // Only trigger on the scroll container itself or chips (not on buttons/links)
+    if (e.target.closest('a, button')) return;
+    const el = e.currentTarget;
+    activeScroll = el;
+    startX = e.pageX - el.offsetLeft;
+    scrollLeft = el.scrollLeft;
+    isDragging = false;
+    el.classList.remove('dragging');
+  }
+
+  function onMouseMove(e) {
+    if (!activeScroll) return;
+    const x = e.pageX - activeScroll.offsetLeft;
+    const dist = x - startX;
+    if (Math.abs(dist) > 5) {
+      isDragging = true;
+      activeScroll.classList.add('dragging');
+      e.preventDefault();
+    }
+    if (isDragging) {
+      activeScroll.scrollLeft = scrollLeft - dist;
+    }
+  }
+
+  function onMouseUp() {
+    if (!activeScroll) return;
+    activeScroll.classList.remove('dragging');
+    activeScroll = null;
+    // isDragging resets on next mousedown — no lingering block
+  }
+
+  function attachDragScroll(el) {
+    el.addEventListener('mousedown', onMouseDown);
+  }
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+  document.addEventListener('mouseleave', onMouseUp);
+
+  function attachAll() {
+    document.querySelectorAll('.alts-scroll:not([data-drag])').forEach(el => {
+      el.setAttribute('data-drag', '1');
+      attachDragScroll(el);
+    });
+  }
+
+  const observer = new MutationObserver(attachAll);
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachAll);
+  } else {
+    attachAll();
+  }
+})();
+
+// THEME
+function toggleTheme() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+if (localStorage.getItem('theme') === 'dark') {
+  document.documentElement.classList.add('dark');
+}
+
+// =====================
+// SAVINGS PLAN
+// =====================
+const savingsPlan = []; // [{id, name, offer, newPrice, oldPrice, saving, url, icon, isFam}]
+
+function toggleSavingsPlan() {
+  document.getElementById('savings-plan').classList.toggle('open');
+}
+
+function addToPlan(id, name, offer, newPrice, oldPrice, url, icon, isFam, perPerson, linesCount) {
+  if (savingsPlan.find(s => s.id === id)) return;
+  savingsPlan.push({
+    id, name, offer,
+    newPrice,   // total foyer new cost
+    oldPrice,   // total foyer old cost
+    saving: oldPrice - newPrice,
+    url, icon, isFam,
+    perPerson: !!perPerson,
+    linesCount: linesCount || 1
+  });
+  renderSavingsPlan();
+  if (savingsPlan.length === 1) document.getElementById('savings-plan').classList.add('open');
+  document.querySelectorAll(`.chip-add[data-spid="${id}"]`).forEach(btn => {
+    btn.classList.add('added');
+    btn.textContent = '✓ Ajouté au plan';
+    btn.onclick = null;
+  });
+}
+
+function removeFromPlan(id) {
+  const idx = savingsPlan.findIndex(s => s.id === id);
+  if (idx >= 0) savingsPlan.splice(idx, 1);
+  renderSavingsPlan();
+  // Re-enable chip button
+  document.querySelectorAll(`.chip-add[data-spid="${id}"]`).forEach(btn => {
+    btn.classList.remove('added');
+    btn.textContent = '+ Ajouter au plan';
+    // Restore onclick — rebuild from data attributes
+    const d = btn.dataset;
+    btn.onclick = () => addToPlan(d.spid, d.name, d.offer, parseFloat(d.newprice), parseFloat(d.oldprice), d.url, d.icon, d.isfam==='true');
+  });
+}
+
+function renderSavingsPlan() {
+  const badge = document.getElementById('sp-badge');
+  const itemsWrap = document.getElementById('sp-items');
+  const totalMonth = document.getElementById('sp-total-month');
+  const totalPerson = document.getElementById('sp-total-person');
+  const totalYear = document.getElementById('sp-total-year');
+  const statPerson = document.getElementById('sp-stat-person');
+
+  badge.textContent = savingsPlan.length;
+
+  if (!savingsPlan.length) {
+    itemsWrap.innerHTML = '<div class="sp-empty">Cliquez sur "+ Ajouter au plan" sur n\'importe quelle offre ci-dessus</div>';
+    totalMonth.textContent = '0 €';
+    totalPerson.textContent = '0 €';
+    totalYear.textContent = '0 €';
+    statPerson.style.display = 'none';
+    return;
+  }
+
+  const totalSaving = savingsPlan.reduce((s, x) => s + x.saving, 0);
+  totalMonth.textContent = totalSaving.toFixed(2) + ' €';
+  totalYear.textContent = (totalSaving * 12).toFixed(0) + ' €';
+
+  if (nbPeople > 1) {
+    statPerson.style.display = 'block';
+    totalPerson.textContent = (totalSaving / nbPeople).toFixed(2) + ' €';
+  } else {
+    statPerson.style.display = 'none';
+  }
+
+  itemsWrap.innerHTML = '';
+  savingsPlan.forEach(item => {
+    const n = item.linesCount || 1;
+    // Unit price = total / lines
+    const unitPrice = item.perPerson && !item.isFam ? item.newPrice / n : item.newPrice;
+    const unitLabel = item.perPerson && !item.isFam && n > 1
+      ? `${unitPrice.toFixed(2)} €/pers. × ${n} = ${item.newPrice.toFixed(2)} €/mois`
+      : `${item.newPrice.toFixed(2)} €/mois`;
+    const savingPerPerson = nbPeople > 1 ? item.saving / nbPeople : null;
+
+    const div = document.createElement('div');
+    div.className = 'sp-item';
+    div.innerHTML = `
+      <div class="sp-item-info">
+        <div class="sp-item-name">${item.icon || ''} ${item.name}</div>
+        <div class="sp-item-offer">${item.offer}</div>
+        <div style="margin-top:5px">
+          <div style="font-size:12px;font-weight:600;color:var(--text)">${unitLabel}</div>
+          ${item.saving > 0.01 ? `
+            <div style="color:var(--green);font-size:12px;font-weight:700;margin-top:2px">
+              −${item.saving.toFixed(2)} €/mois économisés (foyer)
+            </div>
+            ${savingPerPerson ? `<div style="font-size:11px;color:var(--muted);margin-top:1px">soit −${savingPerPerson.toFixed(2)} €/pers./mois · −${(item.saving*12).toFixed(0)} €/an</div>` : ''}
+          ` : ''}
+        </div>
+        ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);font-weight:600;margin-top:4px;display:inline-block">Voir l'offre ↗</a>` : ''}
+      </div>
+      <button class="sp-item-rm" onclick="removeFromPlan('${item.id}')" title="Retirer du plan">✕</button>
+    `;
+    itemsWrap.appendChild(div);
+  });
+}
+
+// INIT
+renderAll();
+</script>
+</body>
+</html>
