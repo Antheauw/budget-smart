@@ -92,3 +92,4 @@ Les prix et offres évoluent vite ! Si tu constates une erreur ou veux ajouter u
 ## 📄 Licence
 
 MIT — libre d'utilisation, de modification et de redistribution.
+ 
